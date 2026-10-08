@@ -1,0 +1,78 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@layer base {
+  body {
+    @apply bg-dark-900 text-gray-100 font-sans;
+  }
+}
+
+@layer components {
+  .lab-card {
+    @apply bg-dark-800 border border-dark-700 rounded-lg p-4 hover:border-security-blue transition-colors;
+  }
+
+  .lab-btn-primary {
+    @apply px-4 py-2 bg-security-blue hover:bg-blue-600 text-white rounded-lg transition-colors font-medium;
+  }
+
+  .lab-btn-danger {
+    @apply px-4 py-2 bg-security-red hover:bg-red-700 text-white rounded-lg transition-colors font-medium;
+  }
+
+  .lab-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .lab-badge-success {
+    @apply lab-badge bg-green-900/30 text-green-400 border border-green-700;
+  }
+
+  .lab-badge-error {
+    @apply lab-badge bg-red-900/30 text-red-400 border border-red-700;
+  }
+
+  .lab-badge-warning {
+    @apply lab-badge bg-yellow-900/30 text-yellow-400 border border-yellow-700;
+  }
+
+  .lab-code {
+    @apply bg-dark-900 border border-dark-700 rounded p-3 font-mono text-sm overflow-auto;
+  }
+
+  .status-indicator {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .status-running {
+    @apply status-indicator bg-green-900/30 text-green-400;
+  }
+
+  .status-stopped {
+    @apply status-indicator bg-gray-900/30 text-gray-400;
+  }
+
+  .status-error {
+    @apply status-indicator bg-red-900/30 text-red-400;
+  }
+}
+
+.animation-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}

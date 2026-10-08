@@ -1,0 +1,29 @@
+
+services:
+  xss-target:
+    build:
+      context: ./target
+      dockerfile: Dockerfile
+    container_name: xss-lab-target
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    networks:
+      - xss-lab-network
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          memory: 256M
+
+networks:
+  xss-lab-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16

@@ -1,0 +1,55 @@
+id: XSS-01
+name: Cross-Site Scripting (XSS) Demonstration
+version: 1.0.0
+mode: CONTAINER
+difficulty: Intermediate
+estimatedTime: 45
+safety: ISOLATED_LOCAL_ONLY
+
+aim: |
+  To demonstrate how Cross-Site Scripting (XSS) occurs when untrusted user input
+  is rendered by a web application without appropriate output encoding or sanitization,
+  and to demonstrate effective mitigation strategies.
+
+objectives:
+  - Understand the fundamentals of XSS vulnerabilities
+  - Identify how unsafe input handling leads to script injection
+  - Perform a controlled, safe XSS demonstration in an isolated environment
+  - Observe browser-side impact in both vulnerable and secure implementations
+  - Understand the root cause of XSS vulnerabilities
+  - Apply and verify mitigation techniques
+  - Compare vulnerable vs. secure code implementations
+
+services:
+  - xss-target
+
+network:
+  isolated: true
+  name: xss-lab-network
+
+resources:
+  memory: 512m
+  cpu: 1
+  timeout: 300
+
+target:
+  port: 3000
+  url: http://localhost:3000
+  endpoints:
+    - POST /api/vulnerable/submit
+    - POST /api/secure/submit
+    - GET /api/comments/vulnerable
+    - GET /api/comments/secure
+    - POST /api/comments/clear
+    - GET /api/health
+    - GET /api/logs
+
+safePayload: "<script>alert('XSS Demonstration')</script>"
+
+restrictions:
+  - No external network access
+  - No LAN scanning
+  - No credential theft
+  - No cookie/session hijacking
+  - No persistence
+  - No data exfiltration

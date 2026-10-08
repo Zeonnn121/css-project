@@ -1,6 +1,378 @@
-# XSS Virtual Lab - Educational Cybersecurity Laboratory
+# XSS Virtual Lab — Educational Cybersecurity Laboratory
 
-Professional, isolated, and functional XSS (Cross-Site Scripting) educational laboratory built with Electron, React, TypeScript, Docker, and Node.js.
+An interactive, isolated XSS (Cross-Site Scripting) educational laboratory built with **React + Vite**, **TypeScript**, **Docker**, and **Node.js/Express**. Designed for cybersecurity students and security-awareness training.
+
+> ⚠️ **This application contains intentional security vulnerabilities for educational purposes ONLY.**
+> Run it locally. Never expose it to the internet or an external network.
+
+---
+
+## Overview
+
+The lab provides a complete hands-on learning experience: students read theory, run live XSS demonstrations against an isolated Docker backend, compare vulnerable vs. secure code, and test their knowledge in an assessment quiz.
+
+**Features:**
+- ✅ Interactive XSS simulation (vulnerable & secure modes)
+- ✅ **Reflected XSS demo** — search endpoint that echoes input unencoded
+- ✅ **Stored XSS demo** — blog comment feature with no sanitization
+- ✅ Isolated Docker container (no external network access)
+- ✅ Real-time activity logging
+- ✅ Side-by-side code comparison (vulnerable vs. secure)
+- ✅ 12-question assessment quiz (70% pass threshold)
+- ✅ Dark-mode cybersecurity dashboard UI
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+| Tool | Version | Check |
+|------|---------|-------|
+| Node.js | 18+ | `node --version` |
+| npm | 8+ | `npm --version` |
+| Docker Desktop | 20.10+ | `docker --version` |
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Start the React UI
+
+```bash
+npm run dev
+```
+
+Opens the lab at **http://localhost:5173**
+
+### 3. Start the vulnerable backend (Docker)
+
+Open a second terminal:
+
+```bash
+docker-compose up -d --build
+```
+
+Starts the Express target server at **http://localhost:3000**
+
+> Run with `--build` the first time, or after any backend code changes.
+> After that, `docker-compose up -d` is sufficient.
+
+### 4. Start the Lab in the UI
+
+1. Open **http://localhost:5173**
+2. Go to **Lab Setup** → click **Start Lab**
+3. Wait ~5–10 seconds for the health check to pass
+4. Status bar turns **Running** — all demos are now active
+
+---
+
+## Running Commands Reference
+
+```bash
+# Start the React UI (Vite dev server)
+npm run dev
+
+# Start the Docker backend
+docker-compose up -d
+
+# Rebuild the Docker image (required after backend changes)
+docker-compose up -d --build
+
+# Stop the Docker backend
+docker-compose down
+
+# Stream backend logs
+docker-compose logs -f
+
+# Preview the built React app
+npm run preview
+```
+
+---
+
+## Lab Workflow
+
+### Recommended student journey:
+
+| Step | Tab | What to do |
+|------|-----|------------|
+| 1 | **Overview** | Read the experiment scope and objectives |
+| 2 | **Theory** | Learn XSS fundamentals |
+| 3 | **Lab Setup** | Start the Docker environment |
+| 4 | **XSS Simulation** | Run vulnerable vs. secure demonstrations |
+| 5 | **Vulnerable vs Secure** | Compare code side-by-side |
+| 6 | **⚠ Reflected XSS** | Demo: search query reflected unencoded |
+| 7 | **⚠ Stored XSS** | Demo: comment stored & rendered without sanitization |
+| 8 | **Activity Log** | Review all logged events |
+| 9 | **Assessment** | Complete the 12-question quiz |
+| 10 | **References** | Explore authoritative resources |
+
+---
+
+## Demos (Intentionally Vulnerable)
+
+Both demos are in the **⚠ Demos** section at the bottom of the sidebar. They are clearly labelled as educational-only and separated from the main lab pages.
+
+> See [`SECURITY-NOTES.md`](./SECURITY-NOTES.md) for full details on each vulnerability class, how to trigger it, root cause analysis, and fix options.
+
+### Demo 1 — Reflected XSS
+
+**Route:** `GET http://localhost:3000/demo/reflected-xss?q=<payload>`
+
+The `?q=` parameter is interpolated directly into the HTML response with no output encoding. Any script or event-handler attribute in the query executes in the browser.
+
+**Test payloads:**
+```
+<script>alert(1)</script>
+<img src=x onerror=alert('XSS')>
+<svg onload=alert('svg-xss')>
+```
+
+**UI:** Enter a payload in the search box on the **Reflected XSS** page — the backend response renders in an embedded iframe.
+
+---
+
+### Demo 2 — Stored XSS
+
+**Routes:**
+```
+GET  /demo/stored-xss              — Blog page with rendered comments
+POST /demo/stored-xss/submit       — Stores comment (no sanitization)
+GET  /demo/stored-xss/comments     — Returns raw comments as JSON
+POST /demo/stored-xss/clear        — Wipes all comments
+```
+
+User comments are stored as-is and rendered with no encoding. Any payload fires for every subsequent page load.
+
+**Test payloads (comment body):**
+```
+<script>alert('Stored XSS')</script>
+<img src=x onerror="alert('img XSS')">
+<svg onload="alert('svg XSS')">
+```
+
+**UI:** Fill in the comment form on the **Stored XSS** page. Use the Quick Payload buttons to load pre-built payloads.
+
+---
+
+## API Endpoints
+
+All endpoints are on `http://localhost:3000` (local only).
+
+### Core Lab API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Health check |
+| `POST` | `/api/vulnerable/submit` | Submit to vulnerable handler |
+| `POST` | `/api/secure/submit` | Submit to secure handler |
+| `GET` | `/api/comments/vulnerable` | Fetch vulnerable comments |
+| `GET` | `/api/comments/secure` | Fetch secure comments |
+| `POST` | `/api/comments/clear` | Clear all comments |
+| `GET` | `/api/logs` | Fetch server activity logs |
+
+### Demo Routes (Intentionally Vulnerable)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/demo/reflected-xss?q=` | Reflected XSS demo page |
+| `GET` | `/demo/stored-xss` | Stored XSS blog page |
+| `POST` | `/demo/stored-xss/submit` | Store comment (no sanitization) |
+| `GET` | `/demo/stored-xss/comments` | Raw stored comments (JSON) |
+| `POST` | `/demo/stored-xss/clear` | Wipe stored comments |
+
+---
+
+## Project Structure
+
+```
+xss-virtual-lab/
+├── README.md                     # This file
+├── SECURITY-NOTES.md             # Vulnerability details & fix guide
+├── lab.yaml                      # Lab manifest (metadata)
+├── docker-compose.yml            # Docker orchestration
+├── package.json                  # Frontend dependencies & scripts
+├── vite.config.ts                # Vite configuration
+├── tailwind.config.js            # Tailwind CSS theme
+├── tsconfig.json                 # TypeScript config
+├── index.html                    # HTML entry point
+│
+├── src/                          # React frontend (Vite)
+│   ├── main.tsx                  # React entry point
+│   ├── App.tsx                   # Root component + tab router
+│   ├── index.css                 # Global styles & component classes
+│   │
+│   ├── components/
+│   │   ├── TopBar.tsx            # Header: lab status + live clock
+│   │   └── Navigation.tsx        # Sidebar navigation (all tabs)
+│   │
+│   ├── pages/
+│   │   ├── Overview.tsx          # Aim, objectives, quick start
+│   │   ├── Theory.tsx            # XSS theory & concepts
+│   │   ├── LabSetup.tsx          # Start/Stop/Reset + env checks
+│   │   ├── XSSSimulation.tsx     # Core vulnerable vs. secure demo
+│   │   ├── Comparison.tsx        # Side-by-side code view
+│   │   ├── ActivityLog.tsx       # Real-time event log
+│   │   ├── Assessment.tsx        # 12-question quiz
+│   │   ├── References.tsx        # External resources
+│   │   ├── Feedback.tsx          # User feedback form
+│   │   ├── ReflectedXSSDemo.tsx  # ⚠ Reflected XSS demo page
+│   │   └── StoredXSSDemo.tsx     # ⚠ Stored XSS demo page
+│   │
+│   └── store/
+│       └── labStore.ts           # Zustand global state
+│
+├── target/                       # Dockerized Express.js backend
+│   ├── Dockerfile
+│   ├── package.json
+│   └── src/
+│       ├── server.js             # Express app + route registration
+│       ├── vulnerable.js         # ⚠ Unsafe route (no encoding)
+│       ├── secure.js             # ✅ Safe route (HTML entity encoding)
+│       ├── demos.js              # ⚠ Reflected & Stored XSS demo routes
+│       └── logger.js             # Activity logger
+│
+├── electron/                     # Electron desktop wrapper (optional)
+│   ├── main.ts
+│   ├── preload.ts
+│   └── ipc/
+│       └── labController.js
+│
+├── docs/
+│   ├── procedure.md              # Step-by-step experiment procedure
+│   └── viva.md                   # Viva questions & answers
+│
+└── tests/                        # Test suite
+```
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|-----------|
+| UI Framework | React 18 + TypeScript |
+| Build Tool | Vite 5 |
+| Styling | Tailwind CSS 3 |
+| State | Zustand |
+| HTTP Client | Axios |
+| Icons | Lucide React |
+| Backend | Node.js 20 + Express 4 |
+| Container | Docker + Docker Compose |
+| Network | Isolated bridge (172.24.0.0/16) |
+
+---
+
+## Safety & Isolation
+
+| Property | Detail |
+|----------|--------|
+| Network | Isolated Docker bridge network — no internet access |
+| Exposure | Only `127.0.0.1:3000` exposed (localhost only) |
+| CPU | Limited to 1 core |
+| Memory | 512 MB limit / 256 MB reservation |
+| Payloads | Only harmless `alert()` and DOM manipulation |
+| Data | All in-memory — nothing leaves your machine |
+
+**Restrictions enforced:**
+- No external HTTP/HTTPS requests from payloads
+- No credential or cookie theft
+- No session hijacking
+- No keylogging
+- No data exfiltration
+- No persistence (data resets on container restart)
+
+---
+
+## Troubleshooting
+
+### Docker not running
+```
+Error: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified
+Fix: Open Docker Desktop and wait for it to fully start, then retry.
+```
+
+### 404 on demo routes after backend code changes
+```
+Fix: Rebuild the Docker image — docker-compose up -d --build
+     (The old image won't have the new routes.)
+```
+
+### Port 3000 already in use
+```
+Fix: Stop whatever is using port 3000, or change the host port
+     in docker-compose.yml: "127.0.0.1:3001:3000"
+```
+
+### Lab health check fails / status stays "Error"
+```
+Fix:
+  1. docker-compose logs   ← check for server errors
+  2. docker-compose down && docker-compose up -d --build
+  3. Ensure 4 GB RAM is available
+```
+
+### No npm script "electron-dev"
+```
+The project runs as a Vite web app (browser-based), not a packaged
+Electron desktop app. Use `npm run dev` instead.
+```
+
+---
+
+## Assessment Quiz
+
+**12 questions** covering XSS definition, types, root causes, output encoding, Content Security Policy, and lab-specific implementations.
+
+- **Pass threshold:** 70% (9 / 12 correct)
+- **Results include:** score, correct/incorrect breakdown, per-question explanations
+
+---
+
+## Viva Questions (Sample)
+
+1. Define XSS and explain its real-world impact
+2. What are the three main types of XSS?
+3. Explain the difference between reflected and stored XSS
+4. Why does output encoding prevent XSS?
+5. What is the role of the browser in an XSS attack?
+6. How does a Content Security Policy help mitigate XSS?
+7. Why should all user input be treated as untrusted?
+8. Explain the vulnerable implementation used in this lab
+9. How does the secure implementation prevent XSS?
+10. What are the limitations of input validation alone?
+11. How would you test for XSS vulnerabilities in code review?
+12. What library would you use client-side to sanitize HTML?
+
+*(Full answers in [`docs/viva.md`](./docs/viva.md))*
+
+---
+
+## Disclaimer
+
+⚠️ **EDUCATIONAL PURPOSE ONLY**
+
+This application intentionally contains security vulnerabilities to demonstrate XSS attacks in a safe, controlled setting.
+
+**Intended for:**
+- Cybersecurity students and trainees
+- Security-awareness sessions
+- Isolated local lab environments
+
+**Do NOT:**
+- Deploy to a public or production server
+- Expose to the internet or a local network
+- Attempt real attacks using these techniques
+
+All activity remains completely local. No data leaves your machine.
+
+---
+
+**Ready to learn?** Open **http://localhost:5173**, go to **Lab Setup**, and start the lab.
+
 
 ## Overview
 
